@@ -1,5 +1,6 @@
 defmodule GenReport do
-  alias GenReport.Parser
+  alias GenReport.{CumulativeHours, HoursPerYear, HoursPerMonth}
+
 
   @workers_by_name [
     "Daniele",
@@ -15,19 +16,28 @@ defmodule GenReport do
   ]
 
 
+
+
   def build(filename) do
-    filename
-    |> Parser.parser_file()
-    |> Enum.reduce(create_empty_report(), fn line, report -> sum_values(line, report) end)
+    all_worked_hours = filename
+    |>CumulativeHours.build(@workers_by_name)
+
+    hours_worked_per_year = filename
+    |>HoursPerYear.build(@workers_by_name)
+
+    hours_worked_per_month = filename
+    |>HoursPerMonth.build(@workers_by_name)
+
+
+    %{
+
+      hours_per_month: hours_worked_per_month,
+      all_hours: all_worked_hours,
+      hours_per_year: hours_worked_per_year
+    }
+
   end
 
-  defp sum_values([name, hours, _day, _month, _year], report) do
-     Map.put(report, name, report[name] + hours)
-  end
-
-  def create_empty_report() do
-    Enum.into(@workers_by_name, %{}, &{&1, 0})
-  end
 
   def hello do
     :world
